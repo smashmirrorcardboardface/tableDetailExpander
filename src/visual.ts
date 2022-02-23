@@ -57,6 +57,7 @@ export class Visual implements IVisual {
   public update(options: VisualUpdateOptions) {
     this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
     console.log('Visual update', options);
+    console.log('Visual settings', this.settings);
 
     let dataViews = options.dataViews;
     console.log('Testing Data');
@@ -85,11 +86,47 @@ export class Visual implements IVisual {
     let summaryRowColumns = data.filter((c) => c.source.roles.summaryRowColumn);
     console.log('summaryRowColumns', summaryRowColumns);
 
-    // let detailRowMeta = data.columns.filter((c) => c.roles.detailHTML)[0];
+    let summaryRowColumnsSorted = [...summaryRowColumns].sort((a: any, b: any) => {
+      return a.source.rolesIndex.summaryRowColumn[0] - b.source.rolesIndex.summaryRowColumn[0];
+    });
 
-    // let summaryRowData = data.rows.map((row) => {
-    //   return [...row.slice(0, detailRowMeta.index), ...row.slice(detailRowMeta.index + 1)];
-    // });
+    let summaryRowColumnsNames = summaryRowColumnsSorted.map((c) => c.source.displayName);
+    console.log('summaryRowColumnsNames', summaryRowColumnsNames);
+
+    let detailRowMeta = data.filter((c) => c.source.roles.detailHTML)[0];
+    console.log('detailRowMeta', detailRowMeta);
+
+    let maxValueArrayLength = -Infinity;
+    summaryRowColumns.forEach(function (a, i) {
+      if (a.values.length > maxValueArrayLength) {
+        maxValueArrayLength = a.values.length;
+      }
+    });
+
+    console.log('maxValueArrayLength', maxValueArrayLength);
+
+    let summaryRowData = [];
+    for (let i = 0; i < maxValueArrayLength; i++) {
+      let row = summaryRowColumns.map((c) => {
+        return {
+          name: c.source.displayName,
+          value: c.values[i],
+        };
+      });
+      summaryRowData.push(row);
+    }
+
+    console.log('summaryRowData', summaryRowData);
+
+    let detailRows = data.filter((c) => c.source.roles.detailHTML);
+
+    let detailValues = detailRows[0].values;
+
+    return {
+      summaryRowColumns: summaryRowColumns,
+      summaryRowData: summaryRowData,
+      detailValues: detailValues,
+    };
   }
 
   private static parseSettings(dataView: DataView): VisualSettings {
