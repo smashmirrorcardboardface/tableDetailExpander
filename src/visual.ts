@@ -78,6 +78,46 @@ export class Visual implements IVisual {
 
     const transformedData = this.transformData(dataViews[0].categorical.categories);
     console.log('transformedData', transformedData);
+
+    const tableHeader = document.createElement('tr');
+    tableHeader.classList.add('table-header');
+    transformedData.summaryRowColumnsNames.forEach((column) => {
+      const tableHeaderColumn = document.createElement('th');
+      tableHeaderColumn.innerText = column;
+      tableHeader.appendChild(tableHeaderColumn);
+    });
+    this.table.appendChild(tableHeader);
+
+    transformedData.summaryRowData.forEach((row, rowIndex) => {
+      const tableRow = document.createElement('tr');
+      let rowId = uuidv4();
+      row.forEach((column) => {
+        const cell = document.createElement('td');
+        cell.innerText = column.value;
+        tableRow.appendChild(cell);
+      });
+      this.table.appendChild(tableRow);
+      if (transformedData.detailValues[rowIndex]) {
+        tableRow.onclick = () => toggleRow(rowId);
+        const detailRow = document.createElement('tr');
+        detailRow.setAttribute('id', rowId);
+        detailRow.classList.add('hide-row', 'detail-row');
+        const detailRowCell = document.createElement('td');
+        detailRowCell.colSpan = transformedData.summaryRowColumnsNames.length;
+        detailRowCell.innerHTML = transformedData.detailValues[rowIndex].toLocaleString();
+        detailRow.appendChild(detailRowCell);
+        this.table.appendChild(detailRow);
+      }
+    });
+
+    function toggleRow(rowId: string) {
+      const row = document.getElementById(rowId);
+      if (row.classList.contains('hide-row')) {
+        row.classList.remove('hide-row');
+      } else {
+        row.classList.add('hide-row');
+      }
+    }
   }
 
   private transformData(data: powerbi.DataViewCategoryColumn[]) {
@@ -124,6 +164,7 @@ export class Visual implements IVisual {
 
     return {
       summaryRowColumns: summaryRowColumns,
+      summaryRowColumnsNames: summaryRowColumnsNames,
       summaryRowData: summaryRowData,
       detailValues: detailValues,
     };
