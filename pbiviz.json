@@ -1,1 +1,25 @@
-{"visual":{"name":"tableDetailExpander","displayName":"tableDetailExpander","guid":"tableDetailExpanderF1F34D3214FF4FF194F9ED27D4B3556B","visualClassName":"Visual","version":"1.0.0","description":"","supportUrl":"","gitHubUrl":""},"apiVersion":"3.8.0","author":{"name":"","email":""},"assets":{"icon":"assets/icon.png"},"externalJS":null,"style":"style/visual.less","capabilities":"capabilities.json","dependencies":null,"stringResources":[]}
+{
+    "visual": {
+        "name": "tableDetailExpander",
+        "displayName": "tableDetailExpander",
+        "guid": "tableDetailExpanderF1F34D3214FF4FF194F9ED27D4B3556B",
+        "visualClassName": "Visual",
+        "version": "1.0.0",
+        "description": "Table visual with additional detail row expand/collapse functionality",
+        "supportUrl": "nowt yet",
+        "gitHubUrl": "https://github.com/smashmirrorcardboardface/tableDetailExpander"
+    },
+    "apiVersion": "3.8.0",
+    "author": {
+        "name": "Dion Jones",
+        "email": "monkey@deadcatdesigns.co.uk"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": []
+}
