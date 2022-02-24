@@ -55,6 +55,7 @@ export class Visual implements IVisual {
   }
 
   public update(options: VisualUpdateOptions) {
+    //TODO: Allow scrollbar instead of vanisahing out of viewport
     this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
     console.log('Visual update', options);
     console.log('Visual settings', this.settings);
@@ -90,6 +91,7 @@ export class Visual implements IVisual {
 
     transformedData.summaryRowData.forEach((row, rowIndex) => {
       const tableRow = document.createElement('tr');
+      tableRow.classList.add('summary-row');
       let rowId = uuidv4();
       row.forEach((column) => {
         const cell = document.createElement('td');
@@ -143,14 +145,23 @@ export class Visual implements IVisual {
       }
     });
 
-    console.log('maxValueArrayLength', maxValueArrayLength);
-
     let summaryRowData = [];
     for (let i = 0; i < maxValueArrayLength; i++) {
       let row = summaryRowColumns.map((c) => {
+        let value = c.values[i];
+        if (value instanceof Date && !isNaN(value.getTime())) {
+          value = new Intl.DateTimeFormat('en-GB').format(value);
+        } else if (c.source.type.dateTime === true) {
+          // vile fudge due to bug - https://github.com/microsoft/PowerBI-visuals-tools/issues/412
+          let valueDateTime = value.toLocaleString().split('T');
+          let isBST = valueDateTime[1].split(':')[0] === '23' ? true : false;
+          let valueDate = new Date(valueDateTime[0]);
+          value = isBST ? new Date(valueDate.setHours(valueDate.getHours() + 23)) : valueDate;
+          value = new Intl.DateTimeFormat('en-GB').format(value);
+        }
         return {
           name: c.source.displayName,
-          value: c.values[i],
+          value: value,
         };
       });
       summaryRowData.push(row);
