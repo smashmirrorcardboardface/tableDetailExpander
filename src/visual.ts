@@ -43,19 +43,23 @@ export class Visual implements IVisual {
   private target: HTMLElement;
   private table: HTMLElement;
   private settings: VisualSettings;
+  private wrapper: HTMLElement;
 
   constructor(options: VisualConstructorOptions) {
     console.log('Visual constructor', options);
     this.target = options.element;
 
     if (document) {
+      this.wrapper = document.createElement('div');
+      this.wrapper.setAttribute('id', 'tableFixHead');
       this.table = document.createElement('table');
-      this.target.appendChild(this.table);
+      this.target.appendChild(this.wrapper);
+      this.wrapper.appendChild(this.table);
     }
   }
 
   public update(options: VisualUpdateOptions) {
-    //TODO: Allow scrollbar instead of vanisahing out of viewport
+    document.getElementById('tableFixHead').style.height = `${options.viewport.height}px`;
     this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
     console.log('Visual update', options);
     console.log('Visual settings', this.settings);
@@ -79,6 +83,10 @@ export class Visual implements IVisual {
 
     const transformedData = this.transformData(dataViews[0].categorical.categories);
     console.log('transformedData', transformedData);
+    let thead = document.createElement('thead');
+    this.table.appendChild(thead);
+    let tbody = document.createElement('tbody');
+    this.table.appendChild(tbody);
 
     const tableHeader = document.createElement('tr');
     tableHeader.classList.add('table-header');
@@ -87,7 +95,7 @@ export class Visual implements IVisual {
       tableHeaderColumn.innerText = column;
       tableHeader.appendChild(tableHeaderColumn);
     });
-    this.table.appendChild(tableHeader);
+    thead.appendChild(tableHeader);
 
     transformedData.summaryRowData.forEach((row, rowIndex) => {
       const tableRow = document.createElement('tr');
@@ -98,17 +106,19 @@ export class Visual implements IVisual {
         cell.innerText = column.value;
         tableRow.appendChild(cell);
       });
-      this.table.appendChild(tableRow);
+      tbody.appendChild(tableRow);
+
       if (transformedData.detailValues[rowIndex]) {
         tableRow.onclick = () => toggleRow(rowId);
         const detailRow = document.createElement('tr');
         detailRow.setAttribute('id', rowId);
         detailRow.classList.add('hide-row', 'detail-row');
         const detailRowCell = document.createElement('td');
+        detailRowCell.classList.add('details-cell');
         detailRowCell.colSpan = transformedData.summaryRowColumnsNames.length;
         detailRowCell.innerHTML = transformedData.detailValues[rowIndex].toLocaleString();
         detailRow.appendChild(detailRowCell);
-        this.table.appendChild(detailRow);
+        tbody.appendChild(detailRow);
       }
     });
 
