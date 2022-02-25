@@ -3,12 +3,12 @@
         {
             "displayName": "Summary Row fields",
             "name": "summaryRowColumn",
-            "kind": "Grouping"
+            "kind": "GroupingOrMeasure"
         },
         {
             "displayName": "Detail Row HTML",
             "name": "detailHTML",
-            "kind": "Grouping"
+            "kind": "GroupingOrMeasure"
         }
     ],
     "objects": {
@@ -60,6 +60,13 @@
     },
     "dataViewMappings": [
         {
+            "conditions": [
+                {
+                    "detailHTML": {
+                        "max": 1
+                    }
+                }
+            ],
             "categorical": {
                 "categories": {
                     "select": [

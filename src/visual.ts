@@ -62,9 +62,9 @@ export class Visual implements IVisual {
     document.getElementById('tableFixHead').style.height = `${options.viewport.height}px`;
     this.settings = Visual.parseSettings(options && options.dataViews && options.dataViews[0]);
     console.log('Visual update', options);
-    console.log('Visual settings', this.settings);
 
     let dataViews = options.dataViews;
+
     console.log('Testing Data');
     if (
       !dataViews ||
@@ -81,8 +81,9 @@ export class Visual implements IVisual {
       this.table.removeChild(this.table.firstChild);
     }
 
-    const transformedData = this.transformData(dataViews[0].categorical.categories);
+    const transformedData = this.transformData(dataViews[0]);
     console.log('transformedData', transformedData);
+
     let thead = document.createElement('thead');
     this.table.appendChild(thead);
     let tbody = document.createElement('tbody');
@@ -132,36 +133,29 @@ export class Visual implements IVisual {
     }
   }
 
-  private transformData(data: powerbi.DataViewCategoryColumn[]) {
-    console.log('data', data);
+  private transformData(data) {
+    let categories = data.categorical.categories;
 
-    let summaryRowColumns = data.filter((c) => c.source.roles.summaryRowColumn);
-    console.log('summaryRowColumns', summaryRowColumns);
+    let values = data.categorical.values ? data.categorical.values : null;
 
-    let summaryRowColumnsSorted = [...summaryRowColumns].sort((a: any, b: any) => {
-      return a.source.rolesIndex.summaryRowColumn[0] - b.source.rolesIndex.summaryRowColumn[0];
-    });
+    let categoriesAndValues = values ? categories.concat(values) : categories;
 
-    let summaryRowColumnsNames = summaryRowColumnsSorted.map((c) => c.source.displayName);
-    console.log('summaryRowColumnsNames', summaryRowColumnsNames);
+    let summaryRowColumns = getSummaryRowColumns(categoriesAndValues);
 
-    let detailRowMeta = data.filter((c) => c.source.roles.detailHTML)[0];
-    console.log('detailRowMeta', detailRowMeta);
+    let summaryRowColumnsSorted = sortSummaryRowColumns(summaryRowColumns);
 
-    let maxValueArrayLength = -Infinity;
-    summaryRowColumns.forEach(function (a, i) {
-      if (a.values.length > maxValueArrayLength) {
-        maxValueArrayLength = a.values.length;
-      }
-    });
+    let summaryRowColumnsNames = getSummaryRowColumnsNames(summaryRowColumnsSorted);
+
+    let maxValueArrayLength = getMaxArrayLength(summaryRowColumnsSorted);
 
     let summaryRowData = [];
+
     for (let i = 0; i < maxValueArrayLength; i++) {
-      let row = summaryRowColumns.map((c) => {
-        let value = c.values[i];
+      let row = summaryRowColumnsSorted.map((summaryRowColumn) => {
+        let value = summaryRowColumn.values[i];
         if (value instanceof Date && !isNaN(value.getTime())) {
           value = new Intl.DateTimeFormat('en-GB').format(value);
-        } else if (c.source.type.dateTime === true) {
+        } else if (summaryRowColumn.source.type.dateTime === true) {
           // vile fudge due to bug - https://github.com/microsoft/PowerBI-visuals-tools/issues/412
           let valueDateTime = value.toLocaleString().split('T');
           let isBST = valueDateTime[1].split(':')[0] === '23' ? true : false;
@@ -170,7 +164,7 @@ export class Visual implements IVisual {
           value = new Intl.DateTimeFormat('en-GB').format(value);
         }
         return {
-          name: c.source.displayName,
+          name: summaryRowColumn.source.displayName,
           value: value,
         };
       });
@@ -179,7 +173,7 @@ export class Visual implements IVisual {
 
     console.log('summaryRowData', summaryRowData);
 
-    let detailRows = data.filter((c) => c.source.roles.detailHTML);
+    let detailRows = categoriesAndValues.filter((c) => c.source.roles.detailHTML);
 
     let detailValues = detailRows[0].values;
 
@@ -189,6 +183,34 @@ export class Visual implements IVisual {
       summaryRowData: summaryRowData,
       detailValues: detailValues,
     };
+
+    function getMaxArrayLength(arrays) {
+      let maxArrayLength = -Infinity;
+      arrays.forEach(function (a, i) {
+        if (a.values.length > maxArrayLength) {
+          maxArrayLength = a.values.length;
+        }
+      });
+      return maxArrayLength;
+    }
+
+    function getSummaryRowColumnsNames(summaryRowColumns) {
+      let summaryRowColumnsNames = summaryRowColumns.map((c) => c.source.displayName);
+      console.log('summaryRowColumnsNames', summaryRowColumnsNames);
+      return summaryRowColumnsNames;
+    }
+
+    function sortSummaryRowColumns(summaryRowColumns) {
+      return [...summaryRowColumns].sort((a: any, b: any) => {
+        return a.source.rolesIndex.summaryRowColumn[0] - b.source.rolesIndex.summaryRowColumn[0];
+      });
+    }
+
+    function getSummaryRowColumns(data) {
+      let summaryRowColumns = data.filter((c) => c.source.roles.summaryRowColumn);
+      console.log('summaryRowColumns', summaryRowColumns);
+      return summaryRowColumns;
+    }
   }
 
   private static parseSettings(dataView: DataView): VisualSettings {
