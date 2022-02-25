@@ -1,12 +1,19 @@
+table {
+  border-collapse: collapse;
+  width: 99%;
+}
+th {
+  background: #eee;
+}
 tr {
   margin: 0;
   padding: 0;
 }
-
 th,
 td {
   text-align: left;
   margin: 0;
+  padding: 0.4em 0.5em;
 }
 
 .summary-row:hover {
@@ -20,6 +27,7 @@ td {
 .details-cell {
   padding-left: 30px;
   background-color: #fdfbfb;
+  border: 1px solid #ccc;
 }
 
 #tableFixHead {
@@ -29,23 +37,12 @@ td {
 #tableFixHead thead th {
   position: sticky;
   top: 0;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 500;
   @media only screen and (max-width: 767px) and (min-width: 480px) {
-    font-size: 1.1rem;
+    font-size: 0.8rem;
   }
   @media only screen and (max-width: 479px) {
-    font-size: 1.1rem;
+    font-size: 0.8rem;
   }
-}
-table {
-  border-collapse: collapse;
-  width: 99%;
-}
-th,
-td {
-  padding: 8px 16px;
-}
-th {
-  background: #eee;
 }

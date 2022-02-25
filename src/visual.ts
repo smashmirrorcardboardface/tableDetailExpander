@@ -134,6 +134,7 @@ export class Visual implements IVisual {
   }
 
   private transformData(data) {
+    //TODO: handle blank dates
     let categories = data.categorical.categories;
 
     let values = data.categorical.values ? data.categorical.values : null;
@@ -153,9 +154,11 @@ export class Visual implements IVisual {
     for (let i = 0; i < maxValueArrayLength; i++) {
       let row = summaryRowColumnsSorted.map((summaryRowColumn) => {
         let value = summaryRowColumn.values[i];
+        console.log('value', value);
+
         if (value instanceof Date && !isNaN(value.getTime())) {
           value = new Intl.DateTimeFormat('en-GB').format(value);
-        } else if (summaryRowColumn.source.type.dateTime === true) {
+        } else if (summaryRowColumn.source.type.dateTime === true && value !== null) {
           // vile fudge due to bug - https://github.com/microsoft/PowerBI-visuals-tools/issues/412
           let valueDateTime = value.toLocaleString().split('T');
           let isBST = valueDateTime[1].split(':')[0] === '23' ? true : false;
