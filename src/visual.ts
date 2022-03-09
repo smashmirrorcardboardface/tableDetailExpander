@@ -10,7 +10,6 @@ import IViewport = powerbi.IViewport;
 // Import React dependencies and the added component
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-//import { ReactCircleCard, initialState } from './components/circleCard';
 import { ExpanderTable, initialState } from './components/expanderTable';
 import transformData from './dataTransforms';
 import './../style/visual.less';
@@ -37,7 +36,7 @@ export class Visual implements IVisual {
       const transformedData = transformData(dataView);
 
       console.log('transformedData', transformedData);
-      const columns = transformedData.columnLabels;
+      const columns = transformedData.columnLabels.sort((a, b) => a.sortOrder - b.sortOrder);
 
       ExpanderTable.update({
         columns: columns,
@@ -45,6 +44,7 @@ export class Visual implements IVisual {
         sortColumn: columns[0].name,
         sortType: 'asc',
         loading: false,
+        expandedRowKeys: [],
       });
 
       this.viewport = options.viewport;

@@ -35,7 +35,6 @@ export default function transformData(data) {
 
   function castPrimitiveValue(field, value) {
     let castValue = field?.source.type.dateTime ? new Date(value?.toString()) : value;
-    castValue = castValue instanceof Date ? castValue.toLocaleString() : value;
     return castValue;
   }
 
