@@ -42,6 +42,9 @@ export class Visual implements IVisual {
       ExpanderTable.update({
         columns: columns,
         rows: transformedData.tableData,
+        sortColumn: columns[0].name,
+        sortType: 'asc',
+        loading: false,
       });
 
       this.viewport = options.viewport;
