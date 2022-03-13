@@ -135,6 +135,7 @@ export class ExpanderTable extends React.Component<{}, State> {
           loading={this.state.loading}
           height={400}
           data={this.getData()}
+          shouldUpdateScroll={false}
           onRowClick={(data) => {
             console.log(data);
           }}
@@ -177,7 +178,7 @@ export class ExpanderTable extends React.Component<{}, State> {
                     {(rowData) => {
                       debugger;
                       if (rowData[name] instanceof Date && rowData[name].getTime()) {
-                        return rowData[name].toLocaleString('en-GB', dateOptions);
+                        return rowData[name].toLocaleString('en-US', dateOptions);
                       } else {
                         return rowData[name];
                       }
