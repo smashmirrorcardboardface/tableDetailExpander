@@ -151,7 +151,6 @@ export class Visual implements IVisual {
   }
 
   private transformData(data) {
-    //TODO: handle blank dates
     let categories = data.categorical.categories;
 
     let values = data.categorical.values ? data.categorical.values : null;

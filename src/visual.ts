@@ -19,7 +19,7 @@ export class Visual implements IVisual {
   private reactRoot: JSX.Element;
   private viewport: IViewport;
 
-  private tableData = { message: 'initial table' };
+  private tableData = {};
 
   constructor(options: VisualConstructorOptions) {
     this.reactRoot = React.createElement(ExpanderTable, this.tableData as any);
@@ -34,8 +34,8 @@ export class Visual implements IVisual {
     if (options.dataViews && options.dataViews[0]) {
       const dataView: DataView = options.dataViews[0];
       const transformedData = transformData(dataView);
+      console.log('Transformed data', transformedData);
 
-      console.log('transformedData', transformedData);
       const columns = transformedData.columnLabels.sort((a, b) => a.sortOrder - b.sortOrder);
 
       ExpanderTable.update({
@@ -45,6 +45,7 @@ export class Visual implements IVisual {
         sortType: 'asc',
         loading: false,
         expandedRowKeys: [],
+        detailColumnName: columns.find((c) => c.type === 'detail').name,
       });
 
       this.viewport = options.viewport;

@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export default function transformData(data) {
   let tableData = [];
 
@@ -9,13 +11,17 @@ export default function transformData(data) {
 
   let columnLabels = categoriesAndValues.map(function (cv) {
     let sortOrder = cv.source.rolesIndex.summaryRowColumn ? cv.source.rolesIndex.summaryRowColumn[0] : null;
-    return { name: cv.source.displayName, sortOrder: sortOrder };
+    return {
+      name: cv.source.displayName,
+      sortOrder: sortOrder,
+      type: cv.source.roles.detailHTML ? 'detail' : 'summary',
+    };
   });
 
   let numberOfRecords = getMaxArrayLength(values);
 
   for (let i = 0; i < numberOfRecords; i++) {
-    let rowData = {};
+    let rowData = { uuid: uuidv4() };
     categoriesAndValues.forEach(function (cv) {
       rowData[cv.source.displayName] = castPrimitiveValue(cv, cv.values[i]);
     });
@@ -34,7 +40,7 @@ export default function transformData(data) {
   };
 
   function castPrimitiveValue(field, value) {
-    let castValue = field?.source.type.dateTime ? new Date(value?.toString()) : value;
+    let castValue = field?.source.type.dateTime && value ? new Date(value?.toString()) : value;
     return castValue;
   }
 

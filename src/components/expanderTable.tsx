@@ -7,6 +7,8 @@ import PlusSquareO from '@rsuite/icons/legacy/PlusSquareO';
 import parse from 'html-react-parser';
 import DOMPurify from 'dompurify';
 
+//TODO: removing fields doesn't remove them from the table all the time...
+
 const { HeaderCell, Cell, Column, ColumnGroup } = Table;
 export interface State {
   columns: any[];
@@ -15,6 +17,7 @@ export interface State {
   sortType: string;
   loading: boolean;
   expandedRowKeys: any[];
+  detailColumnName: string;
 }
 
 export const initialState: State = {
@@ -24,14 +27,16 @@ export const initialState: State = {
   sortType: '',
   loading: false,
   expandedRowKeys: [],
+  detailColumnName: 'none',
 };
 
-const rowKey = 'Id';
+const rowKey = 'uuid';
 
-const ExpandCell = ({ rowData, dataKey, expandedRowKeys, onChange, ...props }) => {
+const ExpandCell = ({ rowData, dataKey, expandedRowKeys, onChange, detailColumnName, ...props }) => {
+  console.log('>>Rowdata', rowData);
   return (
     <Cell {...props}>
-      {rowData['Detail HTML'] && (
+      {rowData[detailColumnName] && (
         <IconButton
           size="xs"
           appearance="subtle"
@@ -62,8 +67,6 @@ export class ExpanderTable extends React.Component<{}, State> {
     let { sortColumn, sortType, rows } = this.state;
     if (sortColumn && sortType) {
       return rows.sort((a, b) => {
-        console.log(a[sortColumn], b[sortColumn]);
-
         let x = a[sortColumn];
         let y = b[sortColumn];
         if (x instanceof Date && y instanceof Date) {
@@ -83,8 +86,6 @@ export class ExpanderTable extends React.Component<{}, State> {
   }
 
   handleExpanded(rowData, dataKey) {
-    console.log('handleExpanded', rowData, dataKey);
-
     const { expandedRowKeys } = this.state;
 
     let open = false;
@@ -107,7 +108,6 @@ export class ExpanderTable extends React.Component<{}, State> {
   }
 
   handleSortColumn = (sortColumn, sortType) => {
-    console.log('handleSortColumnIn', sortColumn, sortType);
     this.setState({
       loading: true,
     });
@@ -122,7 +122,7 @@ export class ExpanderTable extends React.Component<{}, State> {
   };
 
   render() {
-    const { columns, rows, expandedRowKeys } = this.state;
+    const { columns, rows, expandedRowKeys, detailColumnName } = this.state;
     let dateOptions = { dateStyle: 'short' };
     return (
       <div className="container">
@@ -150,7 +150,7 @@ export class ExpanderTable extends React.Component<{}, State> {
                     background: '#eee',
                   }}
                 >
-                  <p>{htmlFrom(rowData['Detail HTML'])}</p>
+                  <p>{htmlFrom(rowData[detailColumnName])}</p>
                 </div>
               </div>
             );
@@ -158,15 +158,31 @@ export class ExpanderTable extends React.Component<{}, State> {
         >
           <Column width={70} align="center">
             <HeaderCell></HeaderCell>
-            <ExpandCell rowData={Row} dataKey="id" expandedRowKeys={expandedRowKeys} onChange={this.handleExpanded} />
+            <ExpandCell
+              rowData={Row}
+              dataKey="id"
+              detailColumnName={detailColumnName}
+              expandedRowKeys={expandedRowKeys}
+              onChange={this.handleExpanded}
+            />
           </Column>
           {columns.map((column, index) => {
-            const { key, name } = column;
-            if (name !== 'Detail HTML') {
+            const { key, name, type } = column;
+            console.log('column', column);
+            if (type !== 'detail') {
               return (
                 <Column key={name} flexGrow={index} sortable>
                   <HeaderCell>{name}</HeaderCell>
-                  <Cell dataKey={name}>{(rowData) => rowData[name].toLocaleString('en-GB', dateOptions)}</Cell>
+                  <Cell dataKey={name}>
+                    {(rowData) => {
+                      debugger;
+                      if (rowData[name] instanceof Date && rowData[name].getTime()) {
+                        return rowData[name].toLocaleString('en-GB', dateOptions);
+                      } else {
+                        return rowData[name];
+                      }
+                    }}
+                  </Cell>
                   {/* <Cell dataKey={name} /> */}
                 </Column>
               );
@@ -180,7 +196,6 @@ export class ExpanderTable extends React.Component<{}, State> {
   private static updateCallback: (data: object) => void = null;
 
   public static update(newState: State) {
-    console.log('update', newState);
     //checks to see if component is mounted and updates state
     if (typeof ExpanderTable.updateCallback === 'function') {
       ExpanderTable.updateCallback(newState);
