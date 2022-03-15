@@ -171,7 +171,7 @@ export class ExpanderTable extends React.Component<{}, State> {
                       if (rowData[name] instanceof Date && rowData[name].getTime()) {
                         return rowData[name].toLocaleString('en-GB', dateOptions);
                       } else {
-                        return rowData[name].toString();
+                        return rowData[name];
                       }
                     }}
                   </Cell>

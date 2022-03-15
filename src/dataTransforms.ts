@@ -40,7 +40,13 @@ export default function transformData(data) {
   };
 
   function castPrimitiveValue(field, value) {
-    let castValue = field?.source.type.dateTime && value ? new Date(value?.toString()) : value;
+    let castValue = value;
+    if (field?.source.type.dateTime && value) {
+      castValue = new Date(value?.toString());
+    }
+    if (field?.source.type.bool) {
+      castValue = value.toString();
+    }
     return castValue;
   }
 
