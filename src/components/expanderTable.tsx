@@ -134,6 +134,7 @@ export class ExpanderTable extends React.Component<{}, State> {
           rowHeight={28}
           rowKey={rowKey}
           expandedRowKeys={expandedRowKeys}
+          rowExpandedHeight={50}
           onSortColumn={this.handleSortColumn}
           sortColumn={this.state.sortColumn}
           sortType={this.state.sortType}
@@ -145,13 +146,7 @@ export class ExpanderTable extends React.Component<{}, State> {
             //console.log(data);
           }}
           renderRowExpanded={(rowData) => {
-            return (
-              <div>
-                <div>
-                  <p>{htmlFrom(rowData[detailColumnName])}</p>
-                </div>
-              </div>
-            );
+            return <div className="detail-row">{htmlFrom(rowData[detailColumnName])}</div>;
           }}
         >
           <Column width={50} align="left">
@@ -180,7 +175,6 @@ export class ExpanderTable extends React.Component<{}, State> {
                       }
                     }}
                   </Cell>
-                  {/* <Cell dataKey={name} /> */}
                 </Column>
               );
             }
