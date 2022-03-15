@@ -7,8 +7,6 @@ import PlusSquareO from '@rsuite/icons/legacy/PlusSquareO';
 import parse from 'html-react-parser';
 import DOMPurify from 'dompurify';
 
-//TODO: removing fields doesn't remove them from the table all the time...
-
 const { HeaderCell, Cell, Column, ColumnGroup } = Table;
 export interface State {
   columns: any[];
@@ -33,7 +31,6 @@ export const initialState: State = {
 const rowKey = 'uuid';
 
 const ExpandCell = ({ rowData, dataKey, expandedRowKeys, onChange, detailColumnName, ...props }) => {
-  console.log('>>Rowdata', rowData);
   return (
     <Cell {...props}>
       {rowData[detailColumnName] && (
@@ -121,43 +118,43 @@ export class ExpanderTable extends React.Component<{}, State> {
     }, 500);
   };
 
+  calculateOptimalColumnWidth(name) {
+    let optimalColumnWidth = name.length < 10 ? name.length * 8 : name.length * 7 - 5;
+    optimalColumnWidth = optimalColumnWidth < 70 ? 70 : optimalColumnWidth;
+    return optimalColumnWidth;
+  }
+
   render() {
     const { columns, rows, expandedRowKeys, detailColumnName } = this.state;
     let dateOptions = { dateStyle: 'short' };
     return (
       <div className="container">
         <Table
+          virtualized
+          rowHeight={28}
           rowKey={rowKey}
           expandedRowKeys={expandedRowKeys}
           onSortColumn={this.handleSortColumn}
           sortColumn={this.state.sortColumn}
           sortType={this.state.sortType}
           loading={this.state.loading}
-          height={400}
+          height={visualViewport.height - 5}
           data={this.getData()}
           shouldUpdateScroll={false}
           onRowClick={(data) => {
-            console.log(data);
+            //console.log(data);
           }}
           renderRowExpanded={(rowData) => {
             return (
               <div>
-                <div
-                  style={{
-                    width: '100%',
-                    height: 60,
-                    float: 'left',
-                    marginRight: 10,
-                    background: '#eee',
-                  }}
-                >
+                <div>
                   <p>{htmlFrom(rowData[detailColumnName])}</p>
                 </div>
               </div>
             );
           }}
         >
-          <Column width={70} align="center">
+          <Column width={50} align="left">
             <HeaderCell></HeaderCell>
             <ExpandCell
               rowData={Row}
@@ -169,16 +166,15 @@ export class ExpanderTable extends React.Component<{}, State> {
           </Column>
           {columns.map((column, index) => {
             const { key, name, type } = column;
-            console.log('column', column);
+            let columnWidth = this.calculateOptimalColumnWidth(name);
             if (type !== 'detail') {
               return (
-                <Column key={name} flexGrow={index} sortable>
+                <Column key={name} width={columnWidth} sortable>
                   <HeaderCell>{name}</HeaderCell>
-                  <Cell dataKey={name}>
+                  <Cell dataKey={name} style={{ padding: 0 }}>
                     {(rowData) => {
-                      debugger;
                       if (rowData[name] instanceof Date && rowData[name].getTime()) {
-                        return rowData[name].toLocaleString('en-US', dateOptions);
+                        return rowData[name].toLocaleString('en-GB', dateOptions);
                       } else {
                         return rowData[name];
                       }

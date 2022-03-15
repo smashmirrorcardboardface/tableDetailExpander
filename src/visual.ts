@@ -34,7 +34,6 @@ export class Visual implements IVisual {
     if (options.dataViews && options.dataViews[0]) {
       const dataView: DataView = options.dataViews[0];
       const transformedData = transformData(dataView);
-      console.log('Transformed data', transformedData);
 
       const columns = transformedData.columnLabels.sort((a, b) => a.sortOrder - b.sortOrder);
 
