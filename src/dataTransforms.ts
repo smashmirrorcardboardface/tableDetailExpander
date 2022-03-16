@@ -44,7 +44,7 @@ export default function transformData(data) {
     if (field?.source.type.dateTime && value) {
       castValue = new Date(value?.toString());
     }
-    if (field?.source.type.bool) {
+    if (field?.source.type.bool && value) {
       castValue = value.toString();
     }
     return castValue;

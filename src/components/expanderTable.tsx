@@ -7,6 +7,12 @@ import PlusSquareO from '@rsuite/icons/legacy/PlusSquareO';
 import parse from 'html-react-parser';
 import DOMPurify from 'dompurify';
 
+//TODO: - treating ids as strings for sorting
+//TODO: - column width specification
+//TODO: - allow over 1000 rows
+//TODO: - add currency formatting
+//TODO: - percentage formatting
+
 const { HeaderCell, Cell, Column, ColumnGroup } = Table;
 export interface State {
   columns: any[];
@@ -64,12 +70,16 @@ export class ExpanderTable extends React.Component<{}, State> {
     let { sortColumn, sortType, rows } = this.state;
     if (sortColumn && sortType) {
       return rows.sort((a, b) => {
+        console.log(a[sortColumn], b[sortColumn]);
+
         let x = a[sortColumn];
         let y = b[sortColumn];
         if (x instanceof Date && y instanceof Date) {
           x = x.getTime();
           y = y.getTime();
         }
+        x = x === null ? '' : x;
+        y = y === null ? '' : y;
 
         if (x > y) {
           return sortType === 'asc' ? 1 : -1;
