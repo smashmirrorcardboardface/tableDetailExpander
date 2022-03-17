@@ -12,6 +12,7 @@ import DOMPurify from 'dompurify';
 //TODO: - allow over 1000 rows
 //TODO: - add currency formatting
 //TODO: - percentage formatting
+//TODO: - search
 
 const { HeaderCell, Cell, Column, ColumnGroup } = Table;
 export interface State {
@@ -68,10 +69,9 @@ export class ExpanderTable extends React.Component<{}, State> {
 
   getData() {
     let { sortColumn, sortType, rows } = this.state;
+
     if (sortColumn && sortType) {
       return rows.sort((a, b) => {
-        console.log(a[sortColumn], b[sortColumn]);
-
         let x = a[sortColumn];
         let y = b[sortColumn];
         if (x instanceof Date && y instanceof Date) {
@@ -128,20 +128,26 @@ export class ExpanderTable extends React.Component<{}, State> {
     }, 500);
   };
 
-  calculateOptimalColumnWidth(name) {
-    let optimalColumnWidth = name.length < 10 ? name.length * 8 : name.length * 7 - 5;
+  calculateOptimalColumnWidth(name, longestValueLength) {
+    let longestValue = name.length > longestValueLength ? name.length : longestValueLength;
+
+    let optimalColumnWidth = longestValue < 10 ? longestValue * 8 : longestValue * 7 - 5;
     optimalColumnWidth = optimalColumnWidth < 70 ? 70 : optimalColumnWidth;
+    optimalColumnWidth = optimalColumnWidth > 300 ? 300 : optimalColumnWidth;
+    // console.log(`${name} - ${optimalColumnWidth}`);
+
     return optimalColumnWidth;
   }
 
   render() {
     const { columns, rows, expandedRowKeys, detailColumnName } = this.state;
     let dateOptions = { dateStyle: 'short' };
+    const rowHeight = 30;
     return (
       <div className="container">
         <Table
           virtualized
-          rowHeight={28}
+          rowHeight={rowHeight}
           rowKey={rowKey}
           expandedRowKeys={expandedRowKeys}
           rowExpandedHeight={50}
@@ -170,13 +176,21 @@ export class ExpanderTable extends React.Component<{}, State> {
             />
           </Column>
           {columns.map((column, index) => {
-            const { key, name, type } = column;
-            let columnWidth = this.calculateOptimalColumnWidth(name);
+            const { key, name, type, longestValueLength } = column;
+            let columnWidth = this.calculateOptimalColumnWidth(name, longestValueLength);
             if (type !== 'detail') {
               return (
                 <Column key={name} width={columnWidth} sortable>
                   <HeaderCell>{name}</HeaderCell>
-                  <Cell dataKey={name} style={{ padding: 0 }}>
+                  <Cell
+                    dataKey={name}
+                    style={{
+                      paddingTop: 0,
+                      paddingRight: 10,
+                      paddingBottom: 0,
+                      paddingLeft: 0,
+                    }}
+                  >
                     {(rowData) => {
                       if (rowData[name] instanceof Date && rowData[name].getTime()) {
                         return rowData[name].toLocaleString('en-GB', dateOptions);

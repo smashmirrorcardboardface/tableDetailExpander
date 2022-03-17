@@ -10,11 +10,18 @@ export default function transformData(data) {
   let categoriesAndValues = values ? categories.concat(values) : categories;
 
   let columnLabels = categoriesAndValues.map(function (cv) {
+    var longestLength = cv.values.reduce(function (a, b) {
+      a = a === null ? '' : a;
+      b = b === null ? '' : b;
+      return a.toString().length > b.toString().length ? a : b;
+    });
+
     let sortOrder = cv.source.rolesIndex.summaryRowColumn ? cv.source.rolesIndex.summaryRowColumn[0] : null;
     return {
       name: cv.source.displayName,
       sortOrder: sortOrder,
       type: cv.source.roles.detailHTML ? 'detail' : 'summary',
+      longestValueLength: longestLength.toString().length,
     };
   });
 
@@ -44,9 +51,10 @@ export default function transformData(data) {
     if (field?.source.type.dateTime && value) {
       castValue = new Date(value?.toString());
     }
-    if (field?.source.type.bool && value) {
+    if (field?.source.type.bool && value !== null) {
       castValue = value.toString();
     }
+
     return castValue;
   }
 
