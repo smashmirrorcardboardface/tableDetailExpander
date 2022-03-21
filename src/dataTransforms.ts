@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { valueFormatter } from 'powerbi-visuals-utils-formattingutils';
 
 export default function transformData(data) {
   let tableData = [];
@@ -13,7 +14,9 @@ export default function transformData(data) {
     var longestLength = cv.values.reduce(function (a, b) {
       a = a === null ? '' : a;
       b = b === null ? '' : b;
-      return a.toString().length > b.toString().length ? a : b;
+      return castPrimitiveValue(cv, a).length > castPrimitiveValue(cv, b).length
+        ? castPrimitiveValue(cv, a)
+        : castPrimitiveValue(cv, b);
     });
 
     let sortOrder = cv.source.rolesIndex.summaryRowColumn ? cv.source.rolesIndex.summaryRowColumn[0] : null;
@@ -21,7 +24,7 @@ export default function transformData(data) {
       name: cv.source.displayName,
       sortOrder: sortOrder,
       type: cv.source.roles.detailHTML ? 'detail' : 'summary',
-      longestValueLength: longestLength.toString().length,
+      longestValue: longestLength.toString(),
     };
   });
 
@@ -51,10 +54,9 @@ export default function transformData(data) {
     if (field?.source.type.dateTime && value) {
       castValue = new Date(value?.toString());
     }
-    if (field?.source.type.bool && value !== null) {
-      castValue = value.toString();
-    }
-
+    let iValueFormatter = valueFormatter.create({ format: field.source.format });
+    castValue = iValueFormatter.format(castValue);
+    castValue = castValue === '(Blank)' ? '' : castValue;
     return castValue;
   }
 

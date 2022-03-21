@@ -7,14 +7,26 @@ import PlusSquareO from '@rsuite/icons/legacy/PlusSquareO';
 import parse from 'html-react-parser';
 import DOMPurify from 'dompurify';
 
+import { textMeasurementService } from 'powerbi-visuals-utils-formattingutils';
+
 //TODO: - treating ids as strings for sorting
 //TODO: - column width specification
 //TODO: - allow over 1000 rows
-//TODO: - add currency formatting
-//TODO: - percentage formatting
 //TODO: - search
+//TODO: - hide / show columns
 
 const { HeaderCell, Cell, Column, ColumnGroup } = Table;
+
+interface TextProperties {
+  text?: string;
+  fontFamily: string;
+  fontSize: string;
+  fontWeight?: string;
+  fontStyle?: string;
+  fontVariant?: string;
+  whiteSpace?: string;
+}
+
 export interface State {
   columns: any[];
   rows: any[];
@@ -128,15 +140,21 @@ export class ExpanderTable extends React.Component<{}, State> {
     }, 500);
   };
 
-  calculateOptimalColumnWidth(name, longestValueLength) {
-    let longestValue = name.length > longestValueLength ? name.length : longestValueLength;
+  calculateOptimalColumnWidth(name, longestValue) {
+    let textProperties: TextProperties = {
+      text: name,
+      fontFamily: 'Segoe UI',
+      fontSize: '10px',
+    };
 
-    let optimalColumnWidth = longestValue < 10 ? longestValue * 8 : longestValue * 7 - 5;
-    optimalColumnWidth = optimalColumnWidth < 70 ? 70 : optimalColumnWidth;
-    optimalColumnWidth = optimalColumnWidth > 300 ? 300 : optimalColumnWidth;
-    // console.log(`${name} - ${optimalColumnWidth}`);
+    let headerTextWidth = textMeasurementService.measureSvgTextWidth(textProperties);
 
-    return optimalColumnWidth;
+    textProperties.text = longestValue;
+
+    let longestValueTextWidth = textMeasurementService.measureSvgTextWidth(textProperties);
+    let columnWidth = headerTextWidth > longestValueTextWidth ? headerTextWidth + 45 : longestValueTextWidth + 45;
+
+    return columnWidth > 250 ? 250 : columnWidth;
   }
 
   render() {
@@ -176,8 +194,8 @@ export class ExpanderTable extends React.Component<{}, State> {
             />
           </Column>
           {columns.map((column, index) => {
-            const { key, name, type, longestValueLength } = column;
-            let columnWidth = this.calculateOptimalColumnWidth(name, longestValueLength);
+            const { key, name, type, longestValue } = column;
+            let columnWidth = this.calculateOptimalColumnWidth(name, longestValue);
             if (type !== 'detail') {
               return (
                 <Column key={name} width={columnWidth} sortable>
