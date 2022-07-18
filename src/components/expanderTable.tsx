@@ -35,6 +35,7 @@ export interface State {
   loading: boolean;
   expandedRowKeys: any[];
   detailColumnName: string;
+  expandedRowOptions: any;
 }
 
 export const initialState: State = {
@@ -45,6 +46,7 @@ export const initialState: State = {
   loading: false,
   expandedRowKeys: [],
   detailColumnName: 'none',
+  expandedRowOptions: {},
 };
 
 const rowKey = 'uuid';
@@ -168,7 +170,7 @@ export class ExpanderTable extends React.Component<{}, State> {
           rowHeight={rowHeight}
           rowKey={rowKey}
           expandedRowKeys={expandedRowKeys}
-          rowExpandedHeight={50}
+          rowExpandedHeight={100}
           onSortColumn={this.handleSortColumn}
           sortColumn={this.state.sortColumn}
           sortType={this.state.sortType}
@@ -183,7 +185,7 @@ export class ExpanderTable extends React.Component<{}, State> {
             return <div className="detail-row">{htmlFrom(rowData[detailColumnName])}</div>;
           }}
         >
-          <Column width={50} align="left">
+          <Column width={50} align="left" fixed>
             <HeaderCell></HeaderCell>
             <ExpandCell
               rowData={Row}
@@ -198,8 +200,8 @@ export class ExpanderTable extends React.Component<{}, State> {
             let columnWidth = this.calculateOptimalColumnWidth(name, longestValue);
             if (type !== 'detail') {
               return (
-                <Column key={name} width={columnWidth} sortable>
-                  <HeaderCell>{name}</HeaderCell>
+                <Column key={name} sortable flexGrow={1}>
+                  <HeaderCell wordWrap>{name}</HeaderCell>
                   <Cell
                     dataKey={name}
                     style={{
